@@ -6,8 +6,8 @@ all: $(fname).o
 $(fname).o: $(fname).cpp $(fname).h
 	$(CXX) -c $(fname).cpp -o $(fname).o
 
-test: test.cpp $(fname).cpp md5.cpp $(fname).h md5.h
-	$(CXX) test.cpp $(fname).cpp md5.cpp -o test
+test: test.cpp $(fname).cpp $(fname).h md5.h
+	$(CXX) test.cpp $(fname).cpp -o test
 
 test-1: test.cpp
 	$(CXX) test.cpp -o test

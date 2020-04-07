@@ -2,11 +2,36 @@
 
 int main()
 {
-    //ReadConfig
+    //Init ReadConfig
     ConfigManager cm("server.conf");
     int port = cm.GetInt("default", "port", 1234);
 
-    printf("port=%d\n", port);
+    //Init Database
+    DatabaseAccess db;
+    char* buff=new char[100];
+
+    bzero(buff,100);
+    cm.GetString("database","db_host",buff,100,"");
+    string db_host=buff;
+
+    bzero(buff,100);
+    cm.GetString("database","username",buff,100,"");
+    string db_username=buff;
+
+    bzero(buff,100);
+    cm.GetString("database","password",buff,100,"");
+    string db_password=buff;
+
+    bzero(buff,100);
+    cm.GetString("database","db_name",buff,100,"");
+    string db_name=buff;
+
+    bzero(buff,100);
+    cm.GetString("database","charset",buff,100,"");
+    string db_charset=buff;
+
+    db.Init_DB(db_host,db_username,db_password,db_name,db_charset);
+
     int serv_sock;
     pthread_t p_id;
 
@@ -48,7 +73,6 @@ int main()
 
     while (1)
     {
-        printf("123\n");
         Thread_Args *targs = (Thread_Args *)malloc(sizeof(Thread_Args));
         if (!targs)
         {
@@ -62,7 +86,7 @@ int main()
             free(targs);
             continue;
         }
-
+        targs->db=&db;
         pthread_create(&p_id, NULL, pthread_func, (void *)targs);
     }
 
@@ -78,6 +102,7 @@ void *pthread_func(void *args)
     struct sockaddr_in clnt_addr = ((Thread_Args *)args)->clnt_addr;
     int default_delay = ((Thread_Args *)args)->default_delay;
     int competition_delay = ((Thread_Args *)args)->competition_delay;
+    DatabaseAccess *db=((Thread_Args *)args)->db;
     free(args);
 
     char clnt_ip[20];
@@ -88,7 +113,7 @@ void *pthread_func(void *args)
     fflush(stdout);
 
     TCPServer tcpserver(clnt_sock, 1000);
-    map<string, int> gameinfo = tcpserver.login();
+    map<string, int> gameinfo = tcpserver.login(db);
     if (gameinfo["GameType"] == -1)
     {
         printf("登录失败\n");
@@ -111,7 +136,8 @@ void *pthread_func(void *args)
             }
             else if (toClientBlock["Content"] == "MergeFailed")
             {
-                tcpserver.WriteBlock(toClientBlock,{"Type", "Content", "GameID","Step","Score","MaxValue"});
+                tcpserver.WriteBlock(toClientBlock,{"Type", "Content", "GameID","Step","Score","MaxValue"});              
+                db->GameOver_Write(gameinfo,toClientBlock);
                 break;
             }
             else if (toClientBlock["Content"] == "GameOver" || toClientBlock["Content"] == "GameFinished" || toClientBlock["Content"] == "GameTimeout")
@@ -120,7 +146,8 @@ void *pthread_func(void *args)
                 toClientBlock["FinalScore"] = toClientBlock["Score"];
                 toClientBlock["FinalMaxValue"] = toClientBlock["MaxValue"];
                 toClientBlock["FinalMap"] = toClientBlock["NewMap"];
-                tcpserver.WriteBlock(toClientBlock, {"Type", "Content", "GameID", "FinalStep", "FinalScore", "FinalMaxValue", "FinalMap"});
+                tcpserver.WriteBlock(toClientBlock, {"Type", "Content", "GameID", "FinalStep", "FinalScore", "FinalMaxValue", "FinalMap"});            
+                db->GameOver_Write(gameinfo,toClientBlock);
                 break;
             }
             else
@@ -133,4 +160,7 @@ void *pthread_func(void *args)
     if (gameinfo["GameType"] == 1) //competition模式
     {
     }
+
+    
+    return nullptr;
 }

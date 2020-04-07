@@ -1,5 +1,5 @@
 CXX=c++ -std=c++11
-Projs=main.o ConfigManager.o TCP.o GameEngine.o Tools.o
+Projs=main.o ConfigManager.o TCP.o GameEngine.o Tools.o DatabaseAccess.o
 
 SUBDIRS:=$(shell find . -maxdepth 1 -type d)
 SUBDIRS:=$(basename $(patsubst ./%,%,$(SUBDIRS)))
@@ -19,7 +19,8 @@ done
 all: main
 
 main: Proj main.o
-	$(CXX) main.o ConfigManager.o TCP.o GameEngine.o Tools.o -lpthread -o main
+	$(CXX) main.o ConfigManager.o TCP.o GameEngine.o Tools.o DatabaseAccess.o \
+	`mysql_config --cflags --libs` -lpthread -o main
 
 main.o: main.cpp main.h common.h
 	$(CXX) -c main.cpp -o main.o

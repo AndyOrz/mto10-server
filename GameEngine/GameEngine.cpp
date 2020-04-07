@@ -219,13 +219,25 @@ map<string, string> Game_Engine::InitGame(map<string, int> &init_game, int defau
         this->delay = init_game["Delay"];
 
         if (this->row == -1 || this->row < 5 || this->row > 8)
+        {
             this->row = rand() % 4 + 5;
+            init_game["Row"]=this->row;
+        }
         if (this->col == -1 || this->col < 5 || this->col > 10)
+        {
             this->col = rand() % 6 + 5;
+            init_game["Col"]=this->col;
+        }
         if (this->gameid == -1 || this->gameid < -1)
+        {
             this->gameid = time(0);
+            init_game["GameID"]=this->gameid;
+        }
         if (this->delay == -1 || this->delay < 2 || this->delay > 60)
+        {
             this->delay = default_delay;
+            init_game["Delay"]=this->delay;
+        }
 
         this->game_map = new uint8_t[row * col];
         this->step = 0;

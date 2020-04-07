@@ -1,3 +1,6 @@
+#ifndef Common_H
+#define Common_H
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -13,3 +16,6 @@ using namespace std;
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include "./DatabaseAccess/DatabaseAccess.h"
+
+#endif

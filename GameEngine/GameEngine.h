@@ -1,3 +1,6 @@
+#ifndef GameEngine_H
+#define GameEngine_H
+
 #include "../common.h"
 #include "cmath"
 #include <set>
@@ -40,3 +43,5 @@ public:
     void FlushChoice(FILE *file, map<string, string> &choice);
     void FlushError(FILE *file, map<string, string> &game);
 };
+
+#endif

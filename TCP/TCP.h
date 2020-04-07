@@ -1,3 +1,6 @@
+#ifndef TCP_H
+#define TCP_H
+
 #include "../common.h"
 using namespace std;
 
@@ -17,8 +20,10 @@ public:
     TCPServer(int sock, int buffer_size);
     ~TCPServer();
 
-    map<string,int> login();
-	int UserAuthenticate(string auth_str);
+    map<string,int> login(DatabaseAccess *db);
+	int UserAuthenticate(string auth_str,DatabaseAccess *db);
     map<string, string> ReadBlock();
     int WriteBlock(map<string, string> &map, list<string> keylist);
 };
+
+#endif
