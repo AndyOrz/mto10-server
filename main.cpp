@@ -5,6 +5,8 @@ int main()
     //Init ReadConfig
     ConfigManager cm("server.conf");
     int port = cm.GetInt("default", "port", 1234);
+    int default_delay = cm.GetInt("default","default_delay",5);
+    int competition_delay = cm.GetInt("default","competition_delay",2);
 
     //Init Database
     DatabaseAccess db;
@@ -87,6 +89,8 @@ int main()
             continue;
         }
         targs->db=&db;
+        targs->default_delay=default_delay;
+        targs->competition_delay=competition_delay;
         pthread_create(&p_id, NULL, pthread_func, (void *)targs);
     }
 
@@ -123,11 +127,11 @@ void *pthread_func(void *args)
     {
         Game_Engine game;
         map<string, string> toClientBlock = game.InitGame(gameinfo, default_delay);
+        printf("delay=%d\n",game.GetDelay());
         tcpserver.WriteBlock(toClientBlock, {"Type", "Content", "Row", "Col", "GameID", "Delay", "Map"});
         while (1)
         {
-            //定时器here
-            map<string, string> fromClientBlock = tcpserver.ReadBlock();
+            map<string, string> fromClientBlock = tcpserver.ReadBlock(game.GetDelay());
             map<string, string> toClientBlock = game.Play(fromClientBlock);
 
             if (toClientBlock["Content"] == "MergeSucceeded")
@@ -137,7 +141,8 @@ void *pthread_func(void *args)
             else if (toClientBlock["Content"] == "MergeFailed")
             {
                 tcpserver.WriteBlock(toClientBlock,{"Type", "Content", "GameID","Step","Score","MaxValue"});              
-                db->GameOver_Write(gameinfo,toClientBlock);
+                if (db->GameOver_Write(gameinfo,toClientBlock)==-1)
+                    printf("%s WriteDatabaseFailed!\n",Tools::Get_Time().c_str());
                 break;
             }
             else if (toClientBlock["Content"] == "GameOver" || toClientBlock["Content"] == "GameFinished" || toClientBlock["Content"] == "GameTimeout")
@@ -147,7 +152,8 @@ void *pthread_func(void *args)
                 toClientBlock["FinalMaxValue"] = toClientBlock["MaxValue"];
                 toClientBlock["FinalMap"] = toClientBlock["NewMap"];
                 tcpserver.WriteBlock(toClientBlock, {"Type", "Content", "GameID", "FinalStep", "FinalScore", "FinalMaxValue", "FinalMap"});            
-                db->GameOver_Write(gameinfo,toClientBlock);
+                if (db->GameOver_Write(gameinfo,toClientBlock)==-1)
+                    printf("%s WriteDatabaseFailed!\n",Tools::Get_Time().c_str());
                 break;
             }
             else

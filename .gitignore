@@ -34,4 +34,4 @@ main
 main_test
 
 # confs
-server.conf
+*.conf

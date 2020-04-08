@@ -79,7 +79,7 @@ list<PossiblePoint> Game_Engine::find_area(PossiblePoint p, bool *flag_map, uint
     list<PossiblePoint> plist;
     q.push(p);
     plist.push_back(p);
-    flag_map[p.x+p.y*this->col]=true;
+    flag_map[p.x + p.y * this->col] = true;
     while (!q.empty())
     {
         PossiblePoint near_p = q.front();
@@ -221,22 +221,22 @@ map<string, string> Game_Engine::InitGame(map<string, int> &init_game, int defau
         if (this->row == -1 || this->row < 5 || this->row > 8)
         {
             this->row = rand() % 4 + 5;
-            init_game["Row"]=this->row;
+            init_game["Row"] = this->row;
         }
         if (this->col == -1 || this->col < 5 || this->col > 10)
         {
             this->col = rand() % 6 + 5;
-            init_game["Col"]=this->col;
+            init_game["Col"] = this->col;
         }
         if (this->gameid == -1 || this->gameid < -1)
         {
             this->gameid = time(0);
-            init_game["GameID"]=this->gameid;
+            init_game["GameID"] = this->gameid;
         }
         if (this->delay == -1 || this->delay < 2 || this->delay > 60)
         {
             this->delay = default_delay;
-            init_game["Delay"]=this->delay;
+            init_game["Delay"] = this->delay;
         }
 
         this->game_map = new uint8_t[row * col];
@@ -267,6 +267,16 @@ map<string, string> Game_Engine::Play(map<string, string> &coordinate)
     block["Type"] = "GameProgress";
     block["GameID"] = to_string(this->gameid);
 
+    if (coordinate["Content"] == "GameTimeout")
+    {
+        block["Content"] = "GameTimeout";
+        block["Step"] = to_string(this->step);
+        block["Score"] = to_string(this->score);
+        block["MaxValue"] = to_string(this->maxvalue);
+        block["NewMap"] = map_to_str(this->game_map);
+        return block;
+    }
+
     int x = coordinate["Col"][0] - '0';
     int y = coordinate["Row"][0] - 'A';
     if (x < 0 || y < 0 || x >= this->col || y >= this->row)
@@ -296,8 +306,8 @@ map<string, string> Game_Engine::Play(map<string, string> &coordinate)
         memcpy(this->game_map, mmap, this->col * this->row);
         delete[] mmap;
         this->step++;
-        this->score += plist.size() * p.value*3;
-        
+        this->score += plist.size() * p.value * 3;
+
         block["Step"] = to_string(this->step);
         block["Score"] = to_string(this->score);
         block["MaxValue"] = to_string(this->maxvalue);
@@ -394,4 +404,9 @@ void Game_Engine::printmap(FILE *file, uint8_t *mmap, bool *flag_map)
                 fprintf(file, "%c%X", (flag_map[j + i * col] ? '_' : ' '), mmap[j + i * col]);
         fprintf(file, "\n");
     }
+}
+
+int Game_Engine::GetDelay()
+{
+    return this->delay;
 }

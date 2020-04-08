@@ -130,11 +130,11 @@ int DatabaseAccess::GameOver_Write(map<string, int> gameinfo, map<string, string
     sql += " values(\"" + to_string(gameinfo["StuNo"]) + "\",\"" + to_string(gameinfo["GameType"]) + "\",\"" + block["GameID"];
     sql += "\"," + to_string(gameinfo["Row"]) + "," + to_string(gameinfo["Col"]) + ",\"";
     sql += Tools::Get_Time() + "\"," + block["Score"] + ")";
-    cout << sql << endl;
+    cerr << Tools::Get_Time() << "Excute SQL:" << sql << endl;
     if (mysql_query(con, sql.c_str()))
     {
         cerr << "query error: " << mysql_error(con) << endl;
-        exit(1);
+        return -1;
     }
     return 0;
 }

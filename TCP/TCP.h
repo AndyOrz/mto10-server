@@ -13,16 +13,18 @@ private:
     int read_remaining, write_remaining;
 
 protected:
-    string ReadLine();        //异步读
-    int WriteLine(string &s); //同步写
+    string ReadLine();            //异步读
+    string ReadLine(timeval &ot); //超时读
+    int WriteLine(string &s);     //同步写
 
 public:
     TCPServer(int sock, int buffer_size);
     ~TCPServer();
 
-    map<string,int> login(DatabaseAccess *db);
-	int UserAuthenticate(string auth_str,DatabaseAccess *db);
+    map<string, int> login(DatabaseAccess *db);
+    int UserAuthenticate(string auth_str, DatabaseAccess *db);
     map<string, string> ReadBlock();
+    map<string, string> ReadBlock(int overtime);
     int WriteBlock(map<string, string> &map, list<string> keylist);
 };
 

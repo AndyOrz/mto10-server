@@ -31,6 +31,7 @@ public:
     Game_Engine();
 
     map<string, string> InitGame(map<string, int> &init_game, int default_delay);
+    int GetDelay();
 
     //返回值0:MergeSucceeded,1:GameOver,2:GameFiniShed,3:GameTimeout
     map<string, string> Play(map<string, string> &coordinate);
