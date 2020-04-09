@@ -18,20 +18,26 @@ drop table if exists game;
 create table game
 (
     game_id int primary key auto_increment,
+    game_time datetime not null,
     stu_no char(7) not null,
     game_mode char(1) not null,
     game_mapid int,
     game_row tinyint,
     game_col tinyint,
-    game_time datetime not null,
-    game_score int not null
+    game_score int not null,
+    game_step int not null,
+    game_maxvalue tinyint not null,
+    game_time_consumed int not null,
+    game_result char(20) not null,
+    game_weighted_score decimal(8,4)
 );
 
 drop table if exists competiiton_map;
 create table competiiton_map
 (
     map_id int primary key auto_increment,
-    time_slice time,
+    time_start datetime,
+    duration_minute smallint,
     seed int,
     row tinyint,
     col tinyint

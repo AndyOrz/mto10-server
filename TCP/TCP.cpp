@@ -220,6 +220,10 @@ map<string, int> TCPServer::login(DatabaseAccess *db)
 		else
 		{
 			map<string, int> gameinfo;
+			timeval now_time;
+			gettimeofday(&now_time,nullptr);
+			gameinfo["GameStartTime_sec"]=now_time.tv_sec;
+			gameinfo["GameStartTime_usec"]=now_time.tv_usec;
 			gameinfo["StuNo"] = stoi(auth_str.substr(0, 7));
 			if (ret == 0) //base模式
 				gameinfo["GameType"] = 0;

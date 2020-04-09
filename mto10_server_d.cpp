@@ -1,4 +1,4 @@
-#include "main.h"
+#include "mto10_server_d.h"
 
 int main()
 {
@@ -127,7 +127,6 @@ void *pthread_func(void *args)
     {
         Game_Engine game;
         map<string, string> toClientBlock = game.InitGame(gameinfo, default_delay);
-        printf("delay=%d\n",game.GetDelay());
         tcpserver.WriteBlock(toClientBlock, {"Type", "Content", "Row", "Col", "GameID", "Delay", "Map"});
         while (1)
         {
