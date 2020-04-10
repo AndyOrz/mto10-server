@@ -2,15 +2,19 @@
 #define TCP_H
 
 #include "../common.h"
+#include "../Tools/Tools.h"
 using namespace std;
 
 class TCPServer
 {
 private:
     int sock;
+    char clnt_ip[20];
+    int clnt_port;
     int buffer_size;
     char *read_buffer, *write_buffer;
     int read_remaining, write_remaining;
+    FILE *logfile;
 
 protected:
     string ReadLine();            //异步读
@@ -18,7 +22,7 @@ protected:
     int WriteLine(string &s);     //同步写
 
 public:
-    TCPServer(int sock, int buffer_size);
+    TCPServer(int sock,const char *clnt_ip, int clnt_port, int buffer_size, FILE *logfile);
     ~TCPServer();
 
     map<string, int> login(DatabaseAccess *db);

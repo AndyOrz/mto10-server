@@ -24,7 +24,7 @@ private:
     string map_to_str(uint8_t *mmap);
     list<PossiblePoint> search_possiblepoints(uint8_t *mmap);
     list<PossiblePoint> find_area(PossiblePoint p, bool *flag_map, uint8_t *mmap);
-    uint8_t * play(uint8_t *mmap, PossiblePoint p, int &max_value);
+    uint8_t * play(uint8_t *mmap, PossiblePoint p, int &max_value, uint8_t *oldmap);
     int generate_random_value(int max_value);
     void printmap(FILE *file,uint8_t *mmap,bool *flag_map);
 public:

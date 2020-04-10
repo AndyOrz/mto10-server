@@ -1,13 +1,16 @@
 #include "TCP.h"
 
-TCPServer::TCPServer(int sock, int buffer_size)
+TCPServer::TCPServer(int sock, const char *clnt_ip, int clnt_port, int buffer_size, FILE *logfile)
 {
 	this->sock = sock;
+	strcpy(this->clnt_ip, clnt_ip);
+	this->clnt_port = clnt_port;
 	this->buffer_size = buffer_size;
 	this->read_buffer = new char[this->buffer_size];
 	this->read_remaining = 0;
 	this->write_buffer = new char[this->buffer_size];
 	this->write_remaining = 0;
+	this->logfile = logfile;
 }
 
 TCPServer::~TCPServer()
@@ -53,7 +56,7 @@ string TCPServer::ReadLine(timeval &ot)
 	string ret = "";
 	while (1)
 	{
-		if (strlen(this->read_buffer)==0)
+		if (strlen(this->read_buffer) == 0)
 		{
 			FD_ZERO(&fds);
 			FD_SET(this->sock, &fds);
@@ -63,7 +66,7 @@ string TCPServer::ReadLine(timeval &ot)
 				return "";
 			}
 		}
-		
+
 		int n = recv(this->sock, this->read_buffer + this->read_remaining,
 					 this->buffer_size - this->read_remaining, MSG_DONTWAIT);
 		if (n > 0)
@@ -140,6 +143,8 @@ map<string, string> TCPServer::ReadBlock(int overtime)
 			errorblock["Content"] = "GameTimeout";
 			return errorblock;
 		}
+		fprintf(logfile, "(%s)[Server]: 从[%s:%d]接接收数据:%s\n", Tools::Get_Time().c_str(), clnt_ip, clnt_port, line.c_str());
+		fflush(logfile);
 		//清换行符
 		int posr = line.find('\r');
 		int posn = line.find('\n');
@@ -166,6 +171,8 @@ int TCPServer::WriteBlock(map<string, string> &map, list<string> keylist)
 	{
 		string line((*iter) + " = " + map[*iter]);
 		WriteLine(line);
+		fprintf(logfile, "(%s)[Server]: 向[%s:%d]发送数据:%s\n", Tools::Get_Time().c_str(), clnt_ip, clnt_port, line.c_str());
+		fflush(logfile);
 		len += line.length() + 2;
 		iter++;
 	}
@@ -176,6 +183,8 @@ int TCPServer::WriteBlock(map<string, string> &map, list<string> keylist)
 		newlen++;
 	line += to_string(newlen);
 	WriteLine(line);
+	fprintf(logfile, "(%s)[Server]: 向[%s:%d]发送数据:%s\n", Tools::Get_Time().c_str(), clnt_ip, clnt_port, line.c_str());
+	fflush(logfile);
 
 	return newlen;
 }
@@ -221,9 +230,9 @@ map<string, int> TCPServer::login(DatabaseAccess *db)
 		{
 			map<string, int> gameinfo;
 			timeval now_time;
-			gettimeofday(&now_time,nullptr);
-			gameinfo["GameStartTime_sec"]=now_time.tv_sec;
-			gameinfo["GameStartTime_usec"]=now_time.tv_usec;
+			gettimeofday(&now_time, nullptr);
+			gameinfo["GameStartTime_sec"] = now_time.tv_sec;
+			gameinfo["GameStartTime_usec"] = now_time.tv_usec;
 			gameinfo["StuNo"] = stoi(auth_str.substr(0, 7));
 			if (ret == 0) //base模式
 				gameinfo["GameType"] = 0;

@@ -13,6 +13,7 @@ typedef struct {
     int clnt_sock;
     struct sockaddr_in clnt_addr;
     DatabaseAccess *db;
+    FILE *logfile;
     int default_delay;
     int competition_delay;
 } Thread_Args;

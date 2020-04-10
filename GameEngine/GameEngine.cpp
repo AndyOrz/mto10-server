@@ -167,7 +167,7 @@ int Game_Engine::generate_random_value(int max_value)
     }
 }
 
-uint8_t *Game_Engine::play(uint8_t *mmap, PossiblePoint p, int &max_value)
+uint8_t *Game_Engine::play(uint8_t *mmap, PossiblePoint p, int &max_value, uint8_t *oldmap)
 {
     uint8_t *m = new uint8_t[this->row * this->col];
     memcpy(m, mmap, this->row * this->col);
@@ -199,6 +199,7 @@ uint8_t *Game_Engine::play(uint8_t *mmap, PossiblePoint p, int &max_value)
             }
         }
 
+    memcpy(oldmap, m, this->row * this->col);
     //填充随机数
     for (int j = this->row - 1; j >= 0; j--)
         for (int i = 0; i < this->col; i++)
@@ -301,10 +302,12 @@ map<string, string> Game_Engine::Play(map<string, string> &coordinate)
     list<PossiblePoint> plist = find_area(p, flag_map, this->game_map);
     if (plist.size() > 1)
     {
-        block["OldMap"] = map_to_str(this->game_map);
-        uint8_t *mmap = play(this->game_map, {x, y}, this->maxvalue);
+        uint8_t *oldmap = new uint8_t[this->col * this->row];
+        uint8_t *mmap = play(this->game_map, {x, y}, this->maxvalue, oldmap);
         memcpy(this->game_map, mmap, this->col * this->row);
+        block["OldMap"] = map_to_str(oldmap);
         delete[] mmap;
+        delete[] oldmap;
         this->step++;
         this->score += plist.size() * p.value * 3;
 
